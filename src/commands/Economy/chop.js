@@ -4,7 +4,7 @@ import { getEconomyData, setEconomyData } from '../../utils/economy.js';
 import { withErrorHandling, createError, ErrorTypes } from '../../utils/errorHandler.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
-const CHOP_COOLDOWN = 30 * 60 * 1000;
+const CHOP_COOLDOWN = 1000;
 
 const BASE_MIN_REWARD = 250;
 const BASE_MAX_REWARD = 900;
