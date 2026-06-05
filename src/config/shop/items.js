@@ -139,6 +139,18 @@ roleId: null,
             type: 'robbery_protection',
             protection: true
         }
+    },
+    {
+    id: "axe",
+    name: "🪓 Axe",
+    price: 5000,
+    description: "+20% rewards from /chop"
+    },
+    {
+    id: "diamond_axe",
+    name: "💎 Diamond Axe",
+    price: 50000,
+    description: "+100% rewards from /chop"
     }
 ];
 
