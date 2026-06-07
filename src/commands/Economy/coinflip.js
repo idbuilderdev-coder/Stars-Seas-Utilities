@@ -129,4 +129,26 @@ export default {
             if (reason === 'lose') {
                 finalEmbed = errorEmbed(
                     "💥 BOOM! You Got Too Greedy!",
-                    `In
+                    `In Round ${round}, the coin landed on the wrong side. You **lost all your winnings** ($${currentWinnings.toLocaleString()}) and your initial bet.`
+                );
+            } else {
+                // reason === 'cashout' or 'time' (timeout)
+                freshUserData.wallet += currentWinnings; // Add the winnings to the wallet
+                await setEconomyData(client, guildId, userId, freshUserData);
+                
+                const timeoutMsg = reason === 'time' ? "\n*(Time expired - Auto Cashed Out)*" : "";
+                finalEmbed = successEmbed(
+                    "💸 Successfully Cashed Out!",
+                    `You stopped at Round ${round} and walked away with **$${currentWinnings.toLocaleString()}**!${timeoutMsg}`
+                );
+            }
+
+            // Update the final message and disable the buttons
+            await interaction.editReply({
+                embeds: [finalEmbed],
+                components: [getButtons(true)] 
+            });
+        });
+
+    }, { command: 'coinflip' })
+};
