@@ -19,7 +19,6 @@ export default {
   data: new SlashCommandBuilder()
     .setName("ship")
     .setDescription("Calculate the compatibility score between two people.")
-    // UBAH 1: Memakai addUserOption agar wajib pilih orang (mention)
     .addUserOption((option) =>
       option
         .setName("user1")
@@ -38,27 +37,23 @@ export default {
     try {
       await InteractionHelper.safeDefer(interaction);
 
-      // UBAH 2: Menggunakan getUser untuk mengambil data akunnya
       const user1 = interaction.options.getUser("user1");
       const user2 = interaction.options.getUser("user2");
 
-      // Cek apakah user nge-ship dengan dirinya sendiri
       if (user1.id === user2.id) {
         const embed = warningEmbed(
           "💖 Ship Score",
-          `**${user1.username}** can't be shipped with themselves! Please choose two different people.`
+          `**${user1.globalName || user1.username}** can't be shipped with themselves! Please choose two different people.`
         );
         return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
       }
 
-      // Menggabungkan ID mereka agar hasilnya konsisten walaupun urutan dibalik
       const sortedIds = [user1.id, user2.id].sort();
       const combination = sortedIds.join("-");
       
       let score = stringToHash(combination) % 101;
 
       // --- CHEAT CODE DIMULAI DI SINI ---
-      // Cukup masukkan angka ID saja karena kita membandingkan dengan user.id
       const idKamu = "1444580570423361668";       
       const idTeman = "975687177235230790";   
 
@@ -90,10 +85,13 @@ export default {
         "█".repeat(Math.floor(score / 10)) +
         "░".repeat(10 - Math.floor(score / 10));
 
-      // Menampilkan mention berwarna biru di pesan Embed menggunakan format <@ID>
+      // Mengambil Display Name atau Username agar tampilannya rapi
+      const nama1 = user1.globalName || user1.username;
+      const nama2 = user2.globalName || user2.username;
+
       const embed = successEmbed(
         `💖 Ship Score`,
-        `<@${user1.id}> vs <@${user2.id}>\n\nCompatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
+        `**${nama1}** vs **${nama2}**\n\nCompatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
       );
 
       await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
