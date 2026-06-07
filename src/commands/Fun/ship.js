@@ -85,15 +85,17 @@ export default {
         "█".repeat(Math.floor(score / 10)) +
         "░".repeat(10 - Math.floor(score / 10));
 
-      // Teks mention dikembalikan ke dalam embed description seperti awal
+      // Kotak embed fokus menampilkan persentase dan bar saja
       const embed = successEmbed(
         `💖 Ship Score`,
-        `<@${user1.id}> vs <@${user2.id}>\n\nCompatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
+        `Compatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
       );
 
-      // Dikirim murni sebagai embed tanpa text content di luarnya
+      // Kirim pesan dengan menaruh MENTION di luar embed (di bagian content)
       await InteractionHelper.safeEditReply(interaction, { 
-        embeds: [embed] 
+        content: `💖 **Ship:** <@${user1.id}> vs <@${user2.id}>`,
+        embeds: [embed],
+        allowedMentions: { users: [] } // <--- KUNCI RAHASIA: Ini yang bikin mention-nya GAK AKAN NGE-PING orangnya!
       });
 
       logger.debug(`Ship command executed by user ${interaction.user.id} in guild ${interaction.guildId}`);
