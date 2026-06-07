@@ -53,7 +53,7 @@ export default {
       
       let score = stringToHash(combination) % 101;
 
-      // --- CHEAT CODE DIMULAI DI SINI ---
+      // --- CHEAT CODE ---
       const idKamu = "1444580570423361668";       
       const idTeman = "975687177235230790";   
 
@@ -85,16 +85,19 @@ export default {
         "█".repeat(Math.floor(score / 10)) +
         "░".repeat(10 - Math.floor(score / 10));
 
-      // Mengambil Display Name atau Username agar tampilannya rapi
-      const nama1 = user1.globalName || user1.username;
-      const nama2 = user2.globalName || user2.username;
-
+      // Kotak embed fokus menampilkan persentase dan bar saja
       const embed = successEmbed(
         `💖 Ship Score`,
-        `**${nama1}** vs **${nama2}**\n\nCompatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
+        `Compatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
       );
 
-      await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+      // Kirim pesan dengan menaruh MENTION di luar embed (di bagian content)
+      await InteractionHelper.safeEditReply(interaction, { 
+        content: `💖 **Ship:** <@${user1.id}> vs <@${user2.id}>`,
+        embeds: [embed],
+        allowedMentions: { users: [] } // <--- KUNCI RAHASIA: Ini yang bikin mention-nya GAK AKAN NGE-PING orangnya!
+      });
+
       logger.debug(`Ship command executed by user ${interaction.user.id} in guild ${interaction.guildId}`);
     } catch (error) {
       logger.error('Ship command error:', error);
