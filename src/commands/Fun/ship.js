@@ -2,7 +2,6 @@ import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, errorEmbed, successEmbed, infoEmbed, warningEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { handleInteractionError, TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { sanitizeInput } from '../../utils/sanitization.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -20,19 +19,18 @@ export default {
   data: new SlashCommandBuilder()
     .setName("ship")
     .setDescription("Calculate the compatibility score between two people.")
-    .addStringOption((option) =>
+    // UBAH 1: Memakai addUserOption agar wajib pilih orang (mention)
+    .addUserOption((option) =>
       option
-        .setName("name1")
-        .setDescription("The first name or user.")
+        .setName("user1")
+        .setDescription("The first user to ship.")
         .setRequired(true)
-        .setMaxLength(100),
     )
-    .addStringOption((option) =>
+    .addUserOption((option) =>
       option
-        .setName("name2")
-        .setDescription("The second name or user.")
+        .setName("user2")
+        .setDescription("The second user to ship.")
         .setRequired(true)
-        .setMaxLength(100),
     ),
   category: 'Fun',
 
@@ -40,47 +38,36 @@ export default {
     try {
       await InteractionHelper.safeDefer(interaction);
 
-      const name1Raw = interaction.options.getString("name1");
-      const name2Raw = interaction.options.getString("name2");
+      // UBAH 2: Menggunakan getUser untuk mengambil data akunnya
+      const user1 = interaction.options.getUser("user1");
+      const user2 = interaction.options.getUser("user2");
 
-      if (!name1Raw || name1Raw.trim().length === 0 || !name2Raw || name2Raw.trim().length === 0) {
-        throw new TitanBotError(
-          'Empty names provided to ship command',
-          ErrorTypes.USER_INPUT,
-          'Please provide valid names for both people!'
-        );
-      }
-
-      const name1 = sanitizeInput(name1Raw.trim(), 100);
-      const name2 = sanitizeInput(name2Raw.trim(), 100);
-
-      if (name1.toLowerCase() === name2.toLowerCase()) {
+      // Cek apakah user nge-ship dengan dirinya sendiri
+      if (user1.id === user2.id) {
         const embed = warningEmbed(
           "💖 Ship Score",
-          `**${name1}** can't be shipped with themselves! Please choose two different people.`
+          `**${user1.username}** can't be shipped with themselves! Please choose two different people.`
         );
         return await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
       }
 
-      const sortedNames = [name1, name2].sort();
-      const combination = sortedNames.join("-").toLowerCase();
+      // Menggabungkan ID mereka agar hasilnya konsisten walaupun urutan dibalik
+      const sortedIds = [user1.id, user2.id].sort();
+      const combination = sortedIds.join("-");
       
-      // --- CHEAT CODE DIMULAI DI SINI ---
-      // Menggunakan 'let' agar skor bisa ditimpa
       let score = stringToHash(combination) % 101;
 
-      // GANTI BAGIAN INI: Masukkan nama kalian menggunakan huruf kecil semua!
-      const namaKamu = "<@1444580570423361668>";       
-      const namaTeman = "<@975687177235230790>";   
+      // --- CHEAT CODE DIMULAI DI SINI ---
+      // Cukup masukkan angka ID saja karena kita membandingkan dengan user.id
+      const idKamu = "1444580570423361668";       
+      const idTeman = "975687177235230790";   
 
-      // Pengecekan apakah input cocok dengan nama kalian berdua
       const isVipMatch = 
-        (name1.toLowerCase() === namaKamu && name2.toLowerCase() === namaTeman) ||
-        (name1.toLowerCase() === namaTeman && name2.toLowerCase() === namaKamu);
+        (user1.id === idKamu && user2.id === idTeman) ||
+        (user1.id === idTeman && user2.id === idKamu);
 
-      // Jika cocok, skor otomatis jadi 100
       if (isVipMatch) {
-        score = 100;
+        score = 98;
       }
       // --- CHEAT CODE SELESAI ---
 
@@ -103,9 +90,10 @@ export default {
         "█".repeat(Math.floor(score / 10)) +
         "░".repeat(10 - Math.floor(score / 10));
 
+      // Menampilkan mention berwarna biru di pesan Embed menggunakan format <@ID>
       const embed = successEmbed(
-        `💖 Ship Score: ${name1} vs ${name2}`,
-        `Compatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
+        `💖 Ship Score`,
+        `<@${user1.id}> vs <@${user2.id}>\n\nCompatibility: **${score}%**\n\n\`${progressBar}\`\n\n*${description}*`,
       );
 
       await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
