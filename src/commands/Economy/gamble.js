@@ -12,7 +12,7 @@ const PAYOUT_MULTIPLIER = 2.0;
 const GAMBLE_COOLDOWN = 10000;
 
 // Daftar angka spesial yang otomatis menang (Auto-Win)
-const SPECIAL_WIN_AMOUNTS = [777, 67, 14, 2008, 7777, ]; 
+const SPECIAL_WIN_AMOUNTS = [77, 67, 14, 28, 6]; 
 
 export default {
     data: new SlashCommandBuilder()
